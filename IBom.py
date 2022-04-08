@@ -11,7 +11,7 @@ ALLOW_TYPE = {"kicad_pcb"}
 
 # App settings
 app = Flask('__name__', static_folder='fonts', static_url_path='')
-# without secret_key it may have sth. wrong
+# without secret_key it may got sth. wrong
 app.secret_key = "sdkfjlqjluio23u429037907!@#!@#!@@"
 app.config['uploadPath'] = path2_PCB
 app.config['Bom'] = path2_BOM
@@ -57,13 +57,7 @@ def Generate_file():
         bom_Name = filename.replace('.kicad_pcb', '.html')
         # Return Bom path
         os.system(f"rm {path2_PCB}/{filename}")
-        link = f"http://utexas.local/BOM/{bom_Name}"
-        return f"<p>To the bom page with this <a href=\"{link}\">bottom</a> </p>"
-
-
-@app.route('/BOM/<filename>', method=['post'])
-def bom(filename):
-    return redirect('filename')
+        return f"<p>To the bom page with this <a href=\"BOM/{bom_Name}\">bottom</a> </p>"
 
 
 if __name__ == '__main__':

@@ -3,13 +3,11 @@ import os
 from flask import Flask, request, flash, redirect
 from werkzeug.utils import secure_filename
 
-
 # The dir of BOM , PCB && allowed file type
 path2_IBom = "./InteractiveHtmlBom"
 path2_PCB = "./fonts/PCB"
 path2_BOM = "./fonts/BOM "
 ALLOW_TYPE = {"kicad_pcb"}
-
 
 # App settings
 app = Flask('__name__', static_folder='fonts', static_url_path='')
@@ -59,10 +57,16 @@ def Generate_file():
         bom_Name = filename.replace('.kicad_pcb', '.html')
         # Return Bom path
         os.system(f"rm {path2_PCB}/{filename}")
-        link = redirect(f"BOM/{bom_Name}")
+        link = f"http://utexas.local/BOM/{bom_Name}"
         return f"<p>To the bom page with this <a href=\"{link}\">bottom</a> </p>"
 
 
+@app.route('/BOM/<filename>', method=['post'])
+def bom(filename):
+    return redirect('filename')
+
+
 if __name__ == '__main__':
-    app.run()
-    
+    app.run(host='0.0.0.0',
+            port=5000,
+            debug=True)

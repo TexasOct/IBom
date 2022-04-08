@@ -6,13 +6,13 @@ from werkzeug.utils import secure_filename
 
 # The dir of BOM , PCB && allowed file type
 path2_IBom = "./InteractiveHtmlBom"
-path2_PCB = "./static/PCB"
-path2_BOM = "./static/BOM "
+path2_PCB = "./fonts/PCB"
+path2_BOM = "./fonts/BOM "
 ALLOW_TYPE = {"kicad_pcb"}
 
 
 # App settings
-app = Flask('__name__', static_url_path='')
+app = Flask('__name__', static_folder='fonts', static_url_path='')
 # without secret_key it may have sth. wrong
 app.secret_key = "sdkfjlqjluio23u429037907!@#!@#!@@"
 app.config['uploadPath'] = path2_PCB
@@ -53,8 +53,8 @@ def upload_file():
             Generate_Bom(filename)
             bom_Name = filename.replace('.kicad_pcb', '.html')
             # Return Bom path
-            os.system(f"rm ./static/BOM/{filename}")
-            return redirect(f'BOM/{bom_Name}')
+            os.system(f"rm {path2_PCB}/{filename}")
+            return redirect(f"BOM/{bom_Name}")
 
     return app.send_static_file('upload.html')
 

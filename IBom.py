@@ -36,27 +36,31 @@ def Generate_Bom(filename):
 
 
 # Path to upload
-@app.route('/', methods=['GET', 'POST'])
-def upload_file():
-    if request.method == 'POST':
-        if 'file' not in request.files:
-            flash('No file part', 'warning')
-            return redirect(request.url)
-        file = request.files['file']
-        if file.filename == '':
-            flash("No selected file", 'warning')
-            return redirect(request.url)
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            # Save upload file backup && Generate Bom
-            file.save(os.path.join(app.config['uploadPath'], filename))
-            Generate_Bom(filename)
-            bom_Name = filename.replace('.kicad_pcb', '.html')
-            # Return Bom path
-            os.system(f"rm {path2_PCB}/{filename}")
-            return redirect(f"BOM/{bom_Name}")
-
+@app.route('/', methods=['GET'])
+def file_path():
     return app.send_static_file('upload.html')
+
+
+# Path to report
+@app.route('/upload', methods=['POST'])
+def Generate_file():
+    if 'file' not in request.files:
+        flash('No file part', 'warning')
+        return redirect(request.url)
+    file = request.files['file']
+    if file.filename == '':
+        flash("No selected file", 'warning')
+        return redirect(request.url)
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        # Save upload file backup && Generate Bom
+        file.save(os.path.join(app.config['uploadPath'], filename))
+        Generate_Bom(filename)
+        bom_Name = filename.replace('.kicad_pcb', '.html')
+        # Return Bom path
+        os.system(f"rm {path2_PCB}/{filename}")
+        link = redirect(f"BOM/{bom_Name}")
+        return f"<p>To the bom page with this <a href=\"{link}\">bottom</a> </p>"
 
 
 if __name__ == '__main__':

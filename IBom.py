@@ -1,20 +1,23 @@
+import hashlib
 import os
 
-from flask import Flask, request, flash, redirect
+from flask import Flask, request, flash, redirect, abort
 from werkzeug.utils import secure_filename
+from pathlib import Path
+
 
 # The dir of BOM , PCB && allowed file type
-path2_IBom = "./InteractiveHtmlBom"
-path2_PCB = "./fonts/PCB"
-path2_BOM = "./fonts/BOM "
+PATH2_IBOM = "./InteractiveHtmlBom"
+
 ALLOW_TYPE = {"kicad_pcb"}
+
+# Future version Dir
+PATH2_FILE = './file'
 
 # App settings
 app = Flask('__name__', static_folder='fonts', static_url_path='')
-# without secret_key it may got sth. wrong
+# without secret_key it may get sth. wrong
 app.secret_key = "sdkfjlqjluio23u429037907!@#!@#!@@"
-app.config['uploadPath'] = path2_PCB
-app.config['Bom'] = path2_BOM
 
 
 # Limited file type
@@ -24,12 +27,11 @@ def allowed_file(filename):
 
 
 # Generate Bom function
-def Generate_Bom(filename):
+def Generate_Bom(filename, sha):
     cmd = f"python3 " \
-          f"{path2_IBom}/generate_interactive_bom.py " \
-          f"{path2_PCB}/{filename} " \
-          f"--dest-dir ../BOM " \
-          f"--name-format %f"
+          f"{PATH2_IBOM}/generate_interactive_bom.py " \
+          f"--no-browser " \
+          f"{PATH2_FILE}/{sha}/{filename}"
     os.system(cmd)
 
 
@@ -51,16 +53,34 @@ def Generate_file():
         return redirect(request.url)
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
+        # sha1 to keep the name different with other PCB file
+        content = file.stream.read()
+        shasum = hashlib.sha1()
+        shasum.update(content)
+        shasum = shasum.hexdigest()
+        os.makedirs(os.path.join(PATH2_FILE, shasum), exist_ok=True)
         # Save upload file backup && Generate Bom
-        file.save(os.path.join(app.config['uploadPath'], filename))
-        Generate_Bom(filename)
-        bom_Name = filename.replace('.kicad_pcb', '.html')
+        with open(os.path.join(PATH2_FILE, shasum, filename), 'wb') as f:
+            f.write(content)
+        with open('./filelist.txt', 'a') as f:
+            f.write(f'{PATH2_FILE}/{shasum}/{filename}\n')
+        Generate_Bom(filename, shasum)
         # Return Bom path
-        os.system(f"rm {path2_PCB}/{filename}")
-        return f"<p>To the bom page with this <a href=\"BOM/{bom_Name}\">bottom</a> </p>"
+        return "<p>To the bom.kicad_ page with this <a href=\"show?id={sha1}\">bottom</a>.</p>".format(sha1=shasum)
+
+
+@app.route('/show', methods=['GET'])
+def show_bom():
+    if 'id' not in request.args:
+        abort(400)
+    if not os.path.isdir(os.path.join(PATH2_FILE, request.args['id'])):
+        abort(404)
+    Path(os.path.join(PATH2_FILE, request.args['id']), 'touch').touch(exist_ok=True)
+    with open(os.path.join(PATH2_FILE, request.args['id'], 'bom', 'ibom.html')) as f:
+        return f.read()
 
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0',
             port=5000,
-            debug=True)
+            debug=False)

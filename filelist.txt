@@ -1,1 +1,2 @@
-
+./file/7ace80a828ab02ef3233e6bfdd179385c72381a4/HP-Project.kicad_pcb
+./file/7ace80a828ab02ef3233e6bfdd179385c72381a4/HP-Project.kicad_pcb

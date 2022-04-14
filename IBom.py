@@ -63,7 +63,7 @@ def Generate_file():
         with open(os.path.join(PATH2_FILE, shasum, filename), 'wb') as f:
             f.write(content)
         Generate_Bom(filename, shasum)
-        with open('./filelist.txt', 'a') as f:
+        with open('file/filelist.txt', 'a') as f:
             f.write(f'{PATH2_FILE}/{shasum}/{filename}\n')
         # Return Bom path
         return f"<p>To the bom.kicad_ page with this <a href=\"bom?id={shasum}\">bottom</a>.</p>"
@@ -81,7 +81,8 @@ def show_bom():
         return f.read()
 
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0',
-            port=5000,
-            debug=False)
+# Debug option
+# if __name__ == '__main__':
+#     app.run(host='0.0.0.0',
+#             port=5000,
+#             debug=False)
